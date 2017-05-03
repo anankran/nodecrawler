@@ -1,33 +1,45 @@
 var Crawler = require("crawler");
+var crawler = new Crawler({
+    maxConnections: 10,
+    debug: true,
+    jquery: true,
+    forceUTF8: true
+});
 
-module.exports = function(callback){
-    var crawler = new Crawler({ maxConnections : 10 });
-    for(x = 0; x <= 10; x++){
-        page = x * 10;
+module.exports = function(context,callback){
+    var page = context.data.page;
+    if(page !== undefined && page !== '' && page !== null){
+        pageLimit = page * 10;
         crawler.queue([{
-            uri: 'https://www.indeed.com/jobs?q=node.js&start=0',
-            jQuery: true,
-            callback: function (error, res, done) {
+            uri: 'https://www.indeed.com/jobs?q=node.js&start='+pageLimit,
+            callback: function (error,response,done) {
                 if(error){
                     console.log(error);
                 } else {
-                    var $ = res.$;
+                    var $ = response.$;
                     var company,job,link;
                     var json = [];
                     if($('#resultsCol .result').length > 0){
+                        var jobKey = 0;
                         $('#resultsCol .result').each(function(key,value){
-                            row = $(this).find('.jobtitle a');
+                            row = $(this).find('h2 a');
                             job = row.text().trim();
-                            link = row.attr('href');
-                            company = $(this).find('.company span').text().trim();
-                            json[key] = { job : job, link : 'https://www.indeed.com'+link, company : company };
+                            if(job !== '' && job !== null && job !== undefined){
+                                link = row.attr('href');
+                                company = $(this).find('.company span').text().trim();
+                                json[jobKey] = { job : job, link : 'https://www.indeed.com'+link, company : company };
+                                ++jobKey;
+                            }
                         });
-                        console.log(json);
-                        callback(null, json);
+                        callback(null,json);
+                    } else {
+                        callback(null,'No data found!');
                     }
                 }
                 done();
             }
         }]);
+    } else {
+        callback(null,'Select a page!');
     }
 }
