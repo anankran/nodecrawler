@@ -7,7 +7,7 @@ var crawler = new Crawler({
 });
 
 module.exports = function(context,callback){
-    var page = context.data.page;
+    var page = Number(context.data.page) - 1;
     if(page !== undefined && page !== '' && page !== null){
         pageLimit = page * 10;
         crawler.queue([{
