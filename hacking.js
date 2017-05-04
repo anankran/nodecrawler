@@ -13,9 +13,7 @@ module.exports = function(context,callback){
         crawler.queue([{
             uri: 'https://www.indeed.com/jobs?q=node.js&start='+pageLimit,
             callback: function (error,response,done) {
-                if(error){
-                    console.log(error);
-                } else {
+                if(!error){
                     var $ = response.$;
                     var company,job,link;
                     var json = [];
@@ -35,6 +33,8 @@ module.exports = function(context,callback){
                     } else {
                         callback(null,'No data found!');
                     }
+                } else {
+                    callback(null,error);
                 }
                 done();
             }
